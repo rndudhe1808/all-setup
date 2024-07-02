@@ -1,0 +1,29 @@
+---
+- name: Copy audit-service file with names from image.txt
+  hosts: localhost
+  gather_facts: no
+  vars:
+    source_file: /root/Upyog/audit-service
+    names_file: /root/Upyog/image.txt
+    dest_dir: /root/Upyog
+  tasks:
+    - name: Ensure the destination directory exists
+      file:
+        path: "{{ dest_dir }}"
+        state: directory
+
+    - name: Read names from image.txt
+      command: cat {{ names_file }}
+      register: names_output
+
+    - name: Split names into a list
+      set_fact:
+        names_list: "{{ names_output.stdout.split('\n') }}"
+
+    - name: Create copies of audit-service file
+      copy:
+        src: "{{ source_file }}"
+        dest: "{{ dest_dir }}/{{ item }}"
+      with_items: "{{ names_list }}"
+      when: item != ''
+

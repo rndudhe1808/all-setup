@@ -1,0 +1,77 @@
+pipeline {
+    agent any
+
+    environment {
+        IMAGE_NAME = 'demo-utility'
+        DOCKERFILE_PATH = "build/maven/Dockerfile"
+        WORKDIR_PATH = "core-services/${IMAGE_NAME}"
+    }
+
+    stages {
+        stage('Clean Workspace') {
+            steps {
+                sh 'rm -rf Upyog'
+            }
+        }
+
+        stage('Clone Repository') {
+            steps {
+                sh 'git clone git@github.com:TetraAloha/Upyog.git'
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials', usernameVariable: 'DOCKER_HUB_USERNAME', passwordVariable: 'DOCKER_HUB_PASSWORD')]) {
+                    sh """
+                        cd Upyog && docker build -t ${IMAGE_NAME}:${params.MESSAGE} -f ${DOCKERFILE_PATH} ${WORKDIR_PATH}
+                        rm -rf *
+                    """
+                }
+            }
+        }
+        
+        stage('Tag Docker Image') {
+            steps {
+                withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials', usernameVariable: 'DOCKER_HUB_USERNAME', passwordVariable: 'DOCKER_HUB_PASSWORD')]) {
+                    sh """
+                        docker tag ${IMAGE_NAME}:${params.MESSAGE} $DOCKER_HUB_USERNAME/${IMAGE_NAME}:${params.MESSAGE}
+                    """
+                }
+            }
+        }
+        
+        stage('Push Docker Image') {
+            steps {
+                withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials', usernameVariable: 'DOCKER_HUB_USERNAME', passwordVariable: 'DOCKER_HUB_PASSWORD')]) {
+                    sh """
+                        echo $DOCKER_HUB_PASSWORD | docker login -u $DOCKER_HUB_USERNAME --password-stdin
+                        docker push $DOCKER_HUB_USERNAME/${IMAGE_NAME}:${params.MESSAGE}
+                        docker logout
+                    """
+                }
+            }
+        }
+        
+        stage('Stop and Clean Up Container') {
+            steps {
+                script {
+                    // Stop and clean up container without failing the pipeline if errors occur
+                    sh """
+                        docker stop  ${IMAGE_NAME} || true
+                        docker rm  ${IMAGE_NAME} || true
+                        docker rmi varun190/${IMAGE_NAME}:${params.MESSAGE} || true
+                    """
+                }
+            }
+        }
+        
+        stage('Run Container') {
+            steps {
+                sh """
+                    docker run --name   ${IMAGE_NAME} -d varun190/${IMAGE_NAME}:${params.MESSAGE}
+                """
+            }
+        }
+    }
+}
