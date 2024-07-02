@@ -2,9 +2,9 @@ pipeline {
     agent any
 
     environment {
-        IMAGE_NAME = 'epass-chatbot'
+        IMAGE_NAME = 'audit-service'
         DOCKERFILE_PATH = "build/maven/Dockerfile"
-        WORKDIR_PATH = "core-services/${IMAGE_NAME}"
+        WORKDIR_PATH = "epass-chatbot/${IMAGE_NAME}"
     }
 
     stages {

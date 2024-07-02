@@ -2,9 +2,9 @@ pipeline {
     agent any
 
     environment {
-        IMAGE_NAME = 'egov-pdf'
-        DOCKERFILE_PATH = "utilities/egov-pdf/Dockerfile"
-        WORKDIR_PATH = "core-services/${IMAGE_NAME}"
+        IMAGE_NAME = 'audit-service'
+        DOCKERFILE_PATH = "build/maven/Dockerfile"
+        WORKDIR_PATH = "egov-pdf/${IMAGE_NAME}"
     }
 
     stages {
