@@ -2,9 +2,9 @@ pipeline {
     agent any
 
     environment {
-        IMAGE_NAME = 'audit-service'
+        IMAGE_NAME = 'enc-client'
         DOCKERFILE_PATH = "build/maven/Dockerfile"
-        WORKDIR_PATH = "epass-chatbot/${IMAGE_NAME}"
+        WORKDIR_PATH = "core-services/${IMAGE_NAME}"
     }
 
     stages {
@@ -60,6 +60,7 @@ pipeline {
                     sh """
                         docker stop  ${IMAGE_NAME} || true
                         docker rm  ${IMAGE_NAME} || true
+                        docker rmi  ${IMAGE_NAME} || true
                         docker rmi varun190/${IMAGE_NAME}:${params.MESSAGE} || true
                     """
                 }

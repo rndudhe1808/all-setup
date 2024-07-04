@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        IMAGE_NAME = 'audit-service'
+        IMAGE_NAME = 'egov-document-uploader-db'
         DOCKERFILE_PATH = "build/maven/Dockerfile"
         WORKDIR_PATH = "core-services/${IMAGE_NAME}"
     }
